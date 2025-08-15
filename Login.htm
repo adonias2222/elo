@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<!-- saved from url=(0071)http://10.200.1.125/ForpontoWeb/Login.aspx?ReturnUrl=%2fForpontoWeb%2fM -->
+<html class="backgroundFull" xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"><link rel="stylesheet" href="./Login_files/shim.css"><link rel="icon" href="http://10.200.1.125/ForpontoWeb/imagens/icones48/forponto.ico"><title>
+
+</title><link href="./Login_files/bootstrap.min.css" rel="stylesheet"><link href="./Login_files/Forponto.css" rel="stylesheet">
+    <script src="./Login_files/jquery-3.4.1.min.js.download" type="text/javascript"></script>
+    <script src="./Login_files/popper.min.js.download" type="text/javascript"></script>
+    <script src="./Login_files/bootstrap.min.js.download" type="text/javascript"></script>
+    <script src="./Login_files/Criptografia.js.download" type="text/javascript"></script>
+    <script src="./Login_files/polyfiller.js.download"></script>
+    <style>
+        Label{
+            color:#ffffff;
+        }
+    </style>
+    <script>
+        function AlterarSenha() {
+            $("#pnlAlteraSenha").show();
+            $("#pnlPeriodo").hide();
+            return false;
+        }
+
+        function AlterarCodigoConsulta(){
+            $("#pnlAlteraCodigoConsulta").show();
+            $("#pnlPeriodo").hide();
+            return false;
+        }
+  
+        function CancelaSenha() {
+            $("#pnlAlteraSenha").hide();
+            $("#pnlPeriodo").show();
+            return false;
+        }
+
+        function CancelaCodigo() {
+            $("#pnlAlteraCodigoConsulta").hide();
+            $("#pnlPeriodo").show();
+            return false;
+        }
+
+        function CancelaA2F() {
+            $("#cmbTipo").show();
+            
+            if ($("#cmbTipo").val() == 0 || $("#txtExibirPerfil").val() == "F") { $("#pnlFuncionario").show(); $("#pnlUsuario").hide(); }
+            if ($("#cmbTipo").val() == 1 || $("#txtExibirPerfil").val() == "G") { $("#pnlFuncionario").hide(); $("#pnlUsuario").show(); }
+            if ($("#cmbTipo").val() == 2 || $("#txtExibirPerfil").val() == "G") { $("#pnlFuncionario").hide(); $("#pnlUsuario").show(); }
+
+            $("#pnlPeriodo").show();            
+            $("#pnlAutenticacaoA2F").hide();
+
+            $('#txtExibirAutenticacao2Fatores').val('N');
+        }
+
+        function cmbTipo_Change(val)
+        {
+            CancelaSenha();
+            CancelaCodigo();
+            if (val == 0 || $("#txtExibirPerfil").val() == "F") { $("#pnlFuncionario").show(); $("#pnlUsuario").hide(); }
+            if (val == 1 || $("#txtExibirPerfil").val() == "G") { $("#pnlFuncionario").hide(); $("#pnlUsuario").show(); }
+            if (val == 2 || $("#txtExibirPerfil").val() == "G") { $("#pnlFuncionario").hide(); $("#pnlUsuario").show(); }
+
+            if ($("#txtExibirPerfil").val() != "") { 
+                $("#imgPerfil").hide();
+            } else {
+                $("#imgPerfil").show();
+            }
+        }
+
+        function BeforeSubmit()
+        {
+            if ($("#txtAutenticacaoIntegrada").val() != "S") {
+                $("#txtUsuario").val($("#txtUsuario").val().toUpperCase());
+                $("#txtMatricula").val($("#txtMatricula").val().toUpperCase());
+
+                //**$("#txtCodConsulta").val("13");//**
+                //**$("#txtSenha").val("ponto7");//**
+
+                var senhaDigitada = $("#txtSenha").val().toString().trim();
+                var consultaDigitada = md5($("#txtCodConsulta").val().toString().trim());
+                var novaSenhaDigitada = $("#txtNovaSenha").val().toString().trim();
+                if ($("#txtDominioAutenticacao").val() != "" || $("#txtServicoAutenticacao").val()) {
+                    $("#txtSenha").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + senhaDigitada));
+                    $("#txtSenhaCaseSensitive").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + senhaDigitada));
+                    $("#txtSenhaCurta").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + CodificaForponto(senhaDigitada)));
+                    if ($("#txtValidacaoADSomenteGestor").val().toString().trim()!="S")
+                        $("#txtCodConsulta").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + $("#txtCodConsulta").val()));
+                    else
+                    {
+                        if ($("#txtCodigoConsultaIgnoraZerosEsquerda").val() == "S")
+                            $("#txtCodConsulta").val(md5($("#txtId").val() + parseInt($("#txtCodConsulta").val())));
+                        else
+                            $("#txtCodConsulta").val(md5($("#txtId").val() + $("#txtCodConsulta").val().toUpperCase()));
+                        $("#txtConsultaExt").val(md5($("#txtId").val() + consultaDigitada.trim()));
+                    }
+                }
+                else {
+                    $("#txtSenha").val(md5($("#txtId").val() + senhaDigitada.toUpperCase()));
+                    $("#txtSenhaCaseSensitive").val(md5($("#txtId").val() + senhaDigitada.toString()));
+                    $("#txtSenhaCurta").val(md5($("#txtId").val() + CodificaForponto(senhaDigitada.toUpperCase())));
+
+                    if ($("#txtCodigoConsultaIgnoraZerosEsquerda").val() == "S")
+                        $("#txtCodConsulta").val(md5($("#txtId").val() + parseInt($("#txtCodConsulta").val())));
+                    else
+                        $("#txtCodConsulta").val(md5($("#txtId").val() + $("#txtCodConsulta").val().toUpperCase()));
+                    $("#txtConsultaExt").val(md5($("#txtId").val() + consultaDigitada.trim()));
+                }
+                $("#txtNovaSenha").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + $("#txtNovaSenha").val().toUpperCase()));
+                $("#txtRepetirSenha").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + $("#txtRepetirSenha").val().toUpperCase()));
+                $("#txtNovaSenhaCaseSensitive").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + novaSenhaDigitada));
+                $("#txtNovoCodigo").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + $("#txtNovoCodigo").val()));
+                $("#txtRepetirCodigo").val(encodeblowfish($("#txtId").val(), $("#txtId").val() + $("#txtRepetirCodigo").val()));
+            }
+        }
+
+        $(document).ready(function () {
+            $("[data-toggle=popover]").popover({
+                sanitize: false,
+                html: true,
+                content: function () {
+                    var content = $(this).attr("data-popover-content");
+                    return $(content).children(".popover-body").html();
+                }
+            });
+            cmbTipo_Change($("#cmbTipo").val());
+            $(".codConsulta").keydown(function (e) {
+                // Allow: backspace, delete, tab, escape, enter and .
+                if ($.inArray(e.keyCode, [46, 8, 9, 27, 13, 110]) !== -1 ||
+                    // Allow: Ctrl+A, Command+A
+                    (e.keyCode === 65 && (e.ctrlKey === true || e.metaKey === true)) ||
+                    // Allow: home, end, left, right, down, up
+                    (e.keyCode >= 35 && e.keyCode <= 40)) {
+                    // let it happen, don't do anything
+                    return;
+                }
+                // Ensure that it is a number and stop the keypress
+                if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                    e.preventDefault();
+                }
+            });
+
+            $('#chkTermoDeUso').change(function () {
+                if (this.checked)
+                    $("#btnSalvarTermo").removeClass("disabled")
+                else
+                    $("#btnSalvarTermo").addClass("disabled")
+            });
+
+            if ($('#txtExibirAutenticacao2Fatores').val() == "S") {
+                $("#pnlFuncionario").hide();
+                $("#pnlUsuario").hide();
+                $("#pnlPeriodo").hide();
+                $("#cmbTipo").hide();
+                $("#pnlAutenticacaoA2F").show();
+            }
+            else {
+                $("#cmbTipo").show();
+            }
+
+
+            
+        });
+    </script>
+</head>
+<body>
+    <form method="post" action="http://10.200.1.125/ForpontoWeb/Login.aspx?ReturnUrl=%2fForpontoWeb%2fM" onkeypress="javascript:return WebForm_FireDefaultButton(event, &#39;btnOk&#39;)" id="form1">
+<div class="aspNetHidden">
+<input type="hidden" name="__LASTFOCUS" id="__LASTFOCUS" value="">
+<input type="hidden" name="__EVENTTARGET" id="__EVENTTARGET" value="">
+<input type="hidden" name="__EVENTARGUMENT" id="__EVENTARGUMENT" value="">
+<input type="hidden" name="__VIEWSTATE" id="__VIEWSTATE" value="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">
+</div>
+
+<script type="text/javascript">
+//<![CDATA[
+var theForm = document.forms['form1'];
+if (!theForm) {
+    theForm = document.form1;
+}
+function __doPostBack(eventTarget, eventArgument) {
+    if (!theForm.onsubmit || (theForm.onsubmit() != false)) {
+        theForm.__EVENTTARGET.value = eventTarget;
+        theForm.__EVENTARGUMENT.value = eventArgument;
+        theForm.submit();
+    }
+}
+//]]>
+</script>
+
+
+<script src="./Login_files/WebResource.axd" type="text/javascript"></script>
+
+
+<script src="./Login_files/ScriptResource.axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(1).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(2).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(3).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(4).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(5).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(6).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(7).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(8).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(9).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(10).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(11).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(12).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(13).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(14).axd" type="text/javascript"></script>
+<script src="./Login_files/ScriptResource(15).axd" type="text/javascript"></script>
+<script src="./Login_files/WebResource(1).axd" type="text/javascript"></script>
+<div class="aspNetHidden">
+
+	<input type="hidden" name="__VIEWSTATEGENERATOR" id="__VIEWSTATEGENERATOR" value="9E9D6A6B">
+	<input type="hidden" name="__EVENTVALIDATION" id="__EVENTVALIDATION" value="ILQ+lMt1DKSvpE7pRSDX70E5dBhgZyZStSnkfLU2FO5ngBiGu7N6I2KpHzc2AR4NTdTbFB65qmENKAAnaigrdtdjewYjqy/HPVMzO2DuGc1X8lEMyQl+V4b9mwT29gZdsPzTFJmgrWIubxGgOCGylNS5UDyu/MdipKSE3QWxX1ejpGIuFrkrLh5Z4cczAseXMMShnG3YGHWnOU6tBUdOBF5L0Aq82S5vMgR2RdfiXi+op6YRndXZcgGfBbnCSqgfgU7mIZDAvfCdjb4jmcSyOk8deiIOao7C/XXfmTPAtZv/IJrn/gfn33xECdu7IuPwoOePBK60NO9u5FOOQkNSsidhNYF0zoOQN8bXgE0JDr4ej3P6iQPJ2Pv08AfmeW/Rp3pR+DD7xDKhFDbElfpUuS/diqfJlUueNTKqZz5lZM0mdsqqAcdqMqKh85FPvH8x810ZM+SZlXNyy94dTp7xixmLLLWc+ma7NZy3cmolWbtkD8OMZY7JJACYpVUaQ+lZeWW6+eBZNiHMZC/LnJsXckhIEdZXI8dLFWQ4dqO+Z6EvOwmgP/HEQTlA5ZzBtjikBpV48oTdkmKvqHLf+ZQJcvgx8Xoi5osJ1WSawar0Xyps4hKT5IRb0/9tm6xuB+CV1i0BIbrG8FIGq7hHpEFqlc/FXrcjNGfd4DH9Dt24kK6D7Cfdrzwvx7/D3lmPv/srLfZArDeAUg9WhXv63663rnunsJfoPPNjVXDexcggoQAKXYoRNhLIOdXL822w+eqXB1Dp180TMl7JIg0K7xgNb7XRcxUYa+W0+BSXjiBUeqP/N1uXtd5CQVfMbL4WonXajxVq8OPMIwolPLQlXWRaTsTyINCsadpQTqpLd0tgPSVAvcGanDH6kmE2Zgori0ogcaGl6erwwN4RY94mbyBdZlEPM4DbgAwYTqByIypPHLHLfov+6te5mXdPOMLzZtSamWk27QQR6guHlVqELv+CXxaYL6JlZx7OkkFdqIMq89I8Jmtnw1y/bC0XhKclIfLt">
+</div>
+        <script type="text/javascript">
+//<![CDATA[
+Sys.WebForms.PageRequestManager._initialize('ScriptManager1', 'form1', [], [], [], 7200, '');
+//]]>
+</script>
+
+        <input type="hidden" name="txtId" id="txtId" value="06ac0d2e2bcd493bb369ac379d9e1709"> 
+        <input type="hidden" name="txtDominioAutenticacao" id="txtDominioAutenticacao"> 
+        <input type="hidden" name="txtAutenticacaoIntegrada" id="txtAutenticacaoIntegrada" value="N"> 
+        <input type="hidden" name="txtSenhaCurta" id="txtSenhaCurta">
+        <input type="hidden" name="txtSenhaCaseSensitive" id="txtSenhaCaseSensitive">
+        <input type="hidden" name="txtNovaSenhaCaseSensitive" id="txtNovaSenhaCaseSensitive">
+        <input type="hidden" name="txtPermiteInformarPeriodo" id="txtPermiteInformarPeriodo" value="N">
+        <input type="hidden" name="txtServicoAutenticacao" id="txtServicoAutenticacao"> 
+        <input type="hidden" name="txtEnderecoAutenticacao" id="txtEnderecoAutenticacao"> 
+        <input type="hidden" name="txtLinkAutenticacao" id="txtLinkAutenticacao"> 
+        <input type="hidden" name="txtExibirPerfil" id="txtExibirPerfil"> 
+        <input type="hidden" name="txtAutenticacao2Fatores" id="txtAutenticacao2Fatores" value="N"> 
+        <input type="hidden" name="txtExibirAutenticacao2Fatores" id="txtExibirAutenticacao2Fatores" value="N"> 
+        <input type="hidden" name="txtCodigoConsultaIgnoraZerosEsquerda" id="txtCodigoConsultaIgnoraZerosEsquerda" value="S"> 
+        <input type="hidden" name="txtConsultaExt" id="txtConsultaExt">
+        <input type="hidden" name="txtValidacaoADSomenteGestor" id="txtValidacaoADSomenteGestor" value="N">
+        <div style="width:320px; height:433px; background:url(Imagens/Common/bg_login_novo.png) no-repeat center center #ffffff; position: absolute; top: 50%; left: 50%; margin-left:-160px; margin-top:-216px;">
+            <label for="cmbTipo" style="margin:10px 0px 46px 130px;"><img id="imgPerfil" src="./Login_files/perfil.png"></label>
+            <select name="cmbTipo" id="cmbTipo" tabindex="1" class="form-control user-success" onchange="cmbTipo_Change(this.value)" style="width:150px; display:inline-block; margin-top:10px;">
+	<option value="0">Funcionário</option>
+	<option selected="selected" value="1">Gerente</option>
+
+</select>
+            <div id="lstIdioma" style="position:absolute; width:90px; right:2px; top:102px;">
+            <input type="image" name="btnIdioma" id="btnIdioma" src="./Login_files/Brazil-Flag-icon.png" onclick="$(&#39;#cmbIdioma&#39;).show(); $(this).hide(); return false;" style="padding-left:4px; display:none;">
+            <select name="cmbIdioma" onchange="javascript:setTimeout(&#39;__doPostBack(\&#39;cmbIdioma\&#39;,\&#39;\&#39;)&#39;, 0)" id="cmbIdioma" class="form-control" style="overflow:hidden; width:90px; z-index:1; display:none;">
+	<option selected="selected" value="pt">Português</option>
+	<option value="es">Espanhol</option>
+
+</select>
+            </div>
+            <div style="width:190px; margin:0 auto;">
+                <div id="pnlUsuario">
+                    <div id="grpUsuario" class="form-group">
+	
+                        <label for="txtUsuario"><span id="lblUsuario">Usuário</span></label>
+                        <div id="valUsuario" class="form-control-validation" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Informe o Usuário.">
+		
+                            <input name="txtUsuario" type="text" maxlength="100" id="txtUsuario" tabindex="2" class="form-control uppercase user-success" style="width:160px;">
+                            <p class="form-control-feedback"><i class="glyphicon glyphicon-exclamation-sign"></i></p>
+                        
+	</div>
+                    
+</div>
+                    <div id="grpSenha" class="form-group">
+	
+                        <label for="txtSenha"><span id="lblSenha">Senha</span></label>                        
+                        <div id="valSenha" class="form-control-validation" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Informe a Senha.">
+		                            
+                            <input name="txtSenha" type="password" maxlength="100" id="txtSenha" tabindex="3" class="form-control" style="width:160px;">
+                            <p class="form-control-feedback"><i class="glyphicon glyphicon-exclamation-sign"></i></p>
+                        
+	</div>                        
+                        <img src="./Login_files/Key-icon.png" id="imgSenha" onclick="return AlterarSenha()" style="float:right;"> 
+                    
+</div>
+                </div>
+                <div id="pnlFuncionario" style="display: none;">
+                <div id="grpMatricula" class="form-group">
+	
+                    <label for="txtMatricula"><span id="lblMatricula">Matrícula</span></label>
+                    <div id="valMatricula" class="form-control-validation" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Informe o(a) Matrícula.">
+		
+                        <input name="txtMatricula" type="text" maxlength="100" id="txtMatricula" tabindex="4" class="form-control uppercase" style="width:160px;">
+                        <p class="form-control-feedback"><i class="glyphicon glyphicon-exclamation-sign"></i></p>
+                    
+	</div>
+                
+</div>
+                <div id="grpCodConsulta" class="form-group">
+	
+                    <label for="txtCodConsulta"><span id="lblCodigoConsulta">Código de Consulta</span></label>                    
+                    <div id="valCodConsulta" class="form-control-validation" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Informe o Código de Consulta.">
+		                        
+                        <input name="txtCodConsulta" type="password" maxlength="100" id="txtCodConsulta" tabindex="5" class="form-control" style="width:160px;">    
+                        <p class="form-control-feedback"><i class="glyphicon glyphicon-exclamation-sign"></i></p>
+                    
+	</div>                        
+                    <input src="./Login_files/Key-icon.png" name="imgConsulta" type="image" id="imgConsulta" onclick="return AlterarCodigoConsulta()" style="float:right;"> 
+                
+</div>
+                </div>
+                <div id="pnlPeriodo">
+                
+                
+                <div class="form-group" style="margin-top:14px; /*padding-left:64px;*/">
+                <a onclick="BeforeSubmit();" id="btnOk" tabindex="8" class="btn btn-success" href="javascript:__doPostBack(&#39;btnOk&#39;,&#39;&#39;)">
+                    <i class="glyphicon glyphicon-ok"></i>
+                </a>
+                </div>
+                </div>
+                <div id="pnlAlteraSenha" style="display:none;">
+                <div id="grpNovaSenha" class="form-group">
+	
+                <label for="txtNovaSenha"><span id="lblNovaSenha">Nova Senha</span></label>
+                <input name="txtNovaSenha" type="password" maxlength="100" id="txtNovaSenha" tabindex="9" class="form-control" data-toggle="tooltip" data-placement="bottom" title="" style="width:160px;" data-original-title="Informe a Nova Senha.">
+                
+</div>
+                <div id="grpRepetirSenha" class="form-group">
+	
+                <label for="txtRepetirSenha"><span id="lblRepetirSenha">Confirmar Senha</span></label>
+                <input name="txtRepetirSenha" type="password" maxlength="100" id="txtRepetirSenha" tabindex="10" class="form-control" data-toggle="tooltip" data-placement="bottom" title="" style="width:160px;" data-original-title="Confirme a Nova Senha.">
+                
+</div>
+                <div class="form-group" style="margin-top:14px; /*padding-left:44px;*/">
+                <a onclick="BeforeSubmit();" id="btnOkSenha" tabindex="11" class="btn btn-success" href="javascript:__doPostBack(&#39;btnOkSenha&#39;,&#39;&#39;)">
+                    <i class="glyphicon glyphicon-ok"></i>
+                </a>
+                <a onclick="return CancelaSenha();" id="btnCancelaSenha" tabindex="12" class="btn btn-warning" href="javascript:__doPostBack(&#39;btnCancelaSenha&#39;,&#39;&#39;)">
+                    <i class="glyphicon glyphicon-remove"></i>
+                </a>
+                </div>
+                </div>
+                
+                <div id="pnlAutenticacaoA2F" style="display:none;">
+                                    
+                <div id="pnlMensagemAutenticacao" class="form-group" style="text-align: center;">
+	
+                <img src="./Login_files/Email50px.png" id="imgAlerta" style="vertical-align:middle; margin-right:10px;">
+                <label for="txtMensagemAutenticacao"><span id="lblMensagemAutenticacao" style="padding-top:3px;">Um código de verificação foi enviado para o seu email.</span></label>
+                <label for="txtMensagemAutenticacao2"><span id="lblMensagemAutenticacao2">Verifique o seu e-mail e informe o código recebido.</span></label>
+                
+                
+</div>
+                   <div id="grpCodigoA2F" class="form-group">
+	                    
+                    <div id="valCodigoA2F" class="form-control-validation" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Informe o Código para Auntenticação.">
+		
+                        <input name="txtCodigoA2F" type="text" maxlength="100" id="txtCodigoA2F" tabindex="4" class="form-control" style="width:160px;">
+                        <p class="form-control-feedback"><i class="glyphicon glyphicon-exclamation-sign"></i></p>
+                    
+	</div>
+                
+</div>
+
+                <label for="lblReenviarCodigo" class="btn btn-link" style="padding: 0px; padding-top: 5px;">            
+                    <a id="btnReenviarCodigo" tabindex="11" class="form-group btn btn-link" href="javascript:__doPostBack(&#39;btnReenviarCodigo&#39;,&#39;&#39;)" style="color: white; padding: 0px;">
+                    <i class="glyphicon glyphicon-envelope"></i>
+                    Reenviar código de Autenticação </a>
+
+                </label>
+
+                <div class="form-group" style="margin-top:14px; /*padding-left:44px;*/">
+                <a id="btnOkA2f" tabindex="11" class="btn btn-success" href="javascript:__doPostBack(&#39;btnOkA2f&#39;,&#39;&#39;)">
+                    <i class="glyphicon glyphicon-ok"></i>
+                    </a>
+                <a onclick="return CancelaA2F();" id="btnCancelaA2f" tabindex="12" class="btn btn-warning" href="javascript:__doPostBack(&#39;btnCancelaA2f&#39;,&#39;&#39;)">
+                    <i class="glyphicon glyphicon-remove"></i>
+                </a>
+                </div>
+                </div>
+                
+
+                <div id="pnlAlteraCodigoConsulta" style="display:none;">
+                <div id="grpNovoCodigo" class="form-group">
+	
+                <label for="txtNovoCodigo"><span id="lblNovoCodigo">Novo Código</span></label>
+
+                <input name="txtNovoCodigo" type="password" maxlength="30" id="txtNovoCodigo" tabindex="13" class="form-control" data-toggle="tooltip" data-placement="bottom" title="" style="width:160px;" data-original-title="Informe o Novo Código de Consulta.">
+                
+</div>
+                <div id="grpRepetirCodigo" class="form-group">
+	
+                <label for="txtRepetirCodigo"><span id="lblConfirmaCodigo">Confirmar Código</span></label>
+
+                <input name="txtRepetirCodigo" type="password" maxlength="30" id="txtRepetirCodigo" tabindex="14" class="form-control" data-toggle="tooltip" data-placement="bottom" title="" style="width:160px;" data-original-title="Confirme o Novo Código de Consulta.">
+                
+</div>
+                <div class="form-group" style="margin-top:14px; /*padding-left:44px;*/">
+                <a onclick="BeforeSubmit();" id="btnOkCodigo" tabindex="15" class="btn btn-success" href="javascript:__doPostBack(&#39;btnOkCodigo&#39;,&#39;&#39;)">
+                    <i class="glyphicon glyphicon-ok"></i>
+                </a>
+                <a onclick="return CancelaCodigo();" id="btnCancelaCodigo" tabindex="16" class="btn btn-warning" href="javascript:__doPostBack(&#39;btnCancelaCodigo&#39;,&#39;&#39;)">
+                    <i class="glyphicon glyphicon-remove"></i>
+                </a>
+                </div>
+                </div>
+            </div>
+            <div style="position:absolute; z-index:2; top:345px; height:105px; width:320px; margin-left:5px; margin-bottom:3px; margin-top:3px;">
+                <span id="lblVersaoDemonstracao" style="font-size:7pt; color:#fff; position:absolute; top:11px;">Versão : 18.1 037 0190</span><br>
+                <span id="lblLinha" style="font-size:7pt; color:#fff;">__________________________________________________________</span><br>                
+                <span id="lblEmpresa" style="font-size:7pt; color:#fff; width:350px;">ELO CONTACT CENTER SERVICOS LTDA</span><br>
+                <span id="lblCNPJ" style="font-size:7pt; color:#fff;">C.N.P.J.: 15.729.974/0002-69</span><br>
+
+            </div>
+        </div>
+        <a id="lnkMensagem" href="javascript:__doPostBack(&#39;lnkMensagem&#39;,&#39;&#39;)"></a>                
+        
+        <div id="pnlMensagemPopup" style="max-width: 500px; display: none; position: fixed; z-index: 10001;" class="panel panel-default">
+            <div class="panel-heading">
+                <img src="./Login_files/Status-dialog-information-icon24.png">
+            </div>
+            <div class="panel-body" style="min-height:60px;">
+                <span id="txtMensagem"></span>
+            </div>
+            <div class="panel-footer">
+                <button type="submit" id="btnYes" class="btn btn-success btn-sm"><i class="glyphicon glyphicon-ok"></i></button>
+            </div>
+        </div>
+
+         <div id="pnlMensagemTermo" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="extMensagemTermoTitle" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="extMensagemTermoTitle" style="font-size:medium; font-weight: bold; " aria-readonly="true">Termos de Uso e Política de Privacidade</h5>
+              </div>
+              <div class="modal-body termo">
+                <div class="termo"> 
+                    <p>A empresa <b>TASK SISTEMAS DE COMPUTAÇÃO S/A</b>, uma empresa do grupo dormakaba, doravante denominada <b>“TASK”</b>, estabelece neste Termo de Uso e Política de Privacidade (“Instrumento”) o <b>acesso e a utilização do sistema Forponto, por meio de aplicações na internet ou aplicativo</b>. A leitura deste instrumento é de extrema importância, pois nele consta as condições de uso, como os seus dados são tratados e sobre a privacidade dos Usuários, bem como autorizar a concessão de licença do uso do sistema, regulando assim a relação entre as partes tudo em conformidade com a legislação brasileira vigente.A Política de Privacidade compreende as práticas de privacidade do Sistema Forponto, criado pela TASK, intermediária entre a empresa contratante do seu sistema, doravante denominada “Empregadora” e o “Usuário” final. Ao realizar download, instalação, cadastro ou login no aplicativo mobile, doravante denominado “Aplicativo”, o Usuário expressa o seu consentimento com as práticas detalhadas a seguir:</p><p><b><u>1. GLOSSÁRIO</u></b></p><p>I) Sistema Forponto – sistema desenvolvido pela empresa Task para  preenchimento de dados, visualização do cartão de ponto, controle da jornada, registro de marcações de ponto e envio de eventos para folha de pagamento, afastamento médico, entre outros relacionados ao ponto do funcionário.</p><p>II) Forponto <i>Mobile</i> – é um aplicativo móbile componente do módulo web do sistema Forponto</p><p>III) Geolocalização – identificação ou estimativa da localização geográfica do usuário.</p><p>IV) Sistema operacional de dispositivo – realiza a execução de operações no aparelho. </p><p>V) Código ID (IMEI/UUID) - rótulo de identificação do dispositivo.</p><p>VI) Cache de dados – depósito onde os dados ficam armazenados na memória temporária do dispositivo.</p><p>VII) Cookies - identifica e armazenar informações do usuário que ficam gravados no dispositivo e podem ser recuperados pelo site que o enviou durante a navegação.</p><p>VIII) Links – ligação de uma palavra, texto ou imagem que quando é clicada pelo usuário, o encaminha para outra página na internet.</p><p>IX) Servidor de internet - estrutura onde armazena os dados e permitem o desenvolvimento e a execução do programa.</p><p>X) Software – programa que permite realizar tarefas específicas.</p><p>XI) Log – registro de operações.</p><p>XII) upload – o ato de transferir dados de um sistema de computador local para um servidor.</p><p>Este glossário serve apenas de referência e não limitará ou afetará o significado dos parágrafos ou itens aos quais se aplicam.</p><p><b><u>TERMOS DE USO</u></b></p><p><b><u>2. OBJETO</u></b></p><p>A empresa Task desenvolveu o sistema denominado Forponto, e concedeu a licença de uso do sistema para a Empregadora e seus colaboradores para os fins exclusivamente profissionais. </p><p><b><u>3. INSTALAÇÃO, CADASTRO E ACESSO AO DADOS DO USUÁRIO NO SISTEMA</u></b></p><p>O software é instalado no servidor de internet da Empregadora, o qual é o Controlador e operador dos dados, sendo que a Empregadora, exclusivamente, terá acesso aos dados de seus funcionários, não sendo nenhuma intervenção realizada pela TASK.O colaborador terá acesso ao sistema mediante o login fornecido pela Empregadora, sendo que pode realizar o download do aplicativo em seu dispositivo celular ou realizar o acesso via internet.</p><p><b><u>4. UPLOAD DE DOCUMENTOS</u></b></p><p>O sistema permite o upload de documentos de sua máquina ou celular, tais como foto do perfil, atestados médicos e outros documentos pertinentes para a relação de trabalho junto a sua Empregadora.</p><p>Você deve garantir a veracidade e exatidão das informações e dados que fornece ao sistema, assumindo a correspondente responsabilidade, bem como se compromete a mantê-los atualizados. O sistema não assume qualquer responsabilidade em caso de inexatidão dos dados informados. </p><p>O envio destes documentos é de sua responsabilidade e para atender os fins profissionais. Sendo que é de seu conhecimento a utilização destes por sua Empregadora. A TASK não se responsabiliza pelas informações prestadas nestes documentos e fotos.</p><p><b><u>5. PROPRIEDADE INTELECTUAL</u></b></p><p>Os direitos de propriedade intelectual da plataforma Forponto são de titularidade da empresa TASK sendo vedado vender, distribuir, sublicenciar, alugar, arrendar, emprestar, dispor, ceder ou de qualquer forma transferir total e/ou parcial, copiar dados para outros locais, alterar, aprimorar, corrigir, traduzir, atualizar, desenvolver novas versões do sistema ou obras derivadas do sistema, desmontar, decompilar, fazer engenharia reversa, ou por meio de qualquer outra fonte obter, acessar, ou tentar obter ou acessar o código fonte do sistema e/ou qualquer dado ou informação confidencial relativo a este e remover avisos autorais ou quaisquer outros avisos de direito de propriedade contidos no sistema.</p><p><b><u>6. LIMITAÇÕES DE RESPONSABILIDADE DA TASK</u></b></p><p>A Empregadora é responsável em definir os campos dos perfis, a permissão de uso e visualização ou a anonimização ou não dos dados a outros usuários, por exemplo, acesso aos gestores, ao departamento de recursos humanos, a controladoria etc., bem como poderá criar novos campos com dados pessoais, inclusive de dados sensíveis.</p><p>Ressalta-se que é de total responsabilidade da Empregadora a parametrização do sistema e a forma do tratamento de toda operação que realiza com dados pessoais, como as que se referem: a coleta, produção, recepção, classificação, utilização, acesso, reprodução, transmissão, distribuição, processamento, arquivamento, armazenamento, eliminação, avaliação ou controle da informação, modificação, comunicação, transferência, difusão ou extração.</p><p>A conformidade e adequação por parte da Empregadora à Lei Geral de Proteção de Dados – Lei de nº 13.709/18 depende de controles de segurança, treinamento dos colaboradores quanto ao acesso e uso de dados pessoais tratados no sistema, respeitando a boa-fé, a confidencialidade no tratamento dos dados, integridade e segurança das informações e outros fatores internos, sob o qual a TASK não tem acesso.</p><p>A TASK não se responsabilizará por interrupções temporárias decorrentes de erros, dificuldades técnicas, contaminação do servidor da Empregadora, por qualquer vírus, caso fortuito ou de força maior, ou outros casos alheios ao seu controle, uma vez que a instalação do sistema é no servidor da Empregadora, assim não será responsável por nenhum dano, obrigação ou prejuízo decorrente do uso incorreto do sistema.</p><p><b><u>7. SANÇÕES</u></b></p><p>O uso do sistema é para fins profissionais e não permitindo o uso para outros fins, sob pena de suspensão e interrupção de acesso ao sistema pela <b>Empregadora</b>.</p><p>O usuário se responsabilizará em indenizar a TASK por danos comprovados resultantes da má utilização do sistema que comprometa a empresa e sua imagem.</p><p><b><u>8. VIGÊNCIA</u></b></p><p>Cabe a Empregadora dar o acesso ao sistema, sendo que em caso de rescisão contratual esta poderá bloquear o acesso.</p><p><b><u>POLÍTICA DE PRIVACIDADE</u></b></p><p>A TASK é uma empresa comprometida com a transparência e apresenta esta Política de Privacidade em conformidade com Lei de Proteção de Dados, neste documento procuramos demonstrar como é o tratamento dos seus dados e para quais finalidades.</p><p><b><u>1. DA PRIVACIDADE DE DADOS</u></b></p><p>A presente Política de Privacidade tem por objetivo assegurar que quaisquer informações relativas aos Usuários, não serão fornecidas, publicadas ou comercializadas em quaisquer circunstâncias, não sendo, portanto, transmitidas a terceiros pela TASK. Isso porque, a TASK conforme já exposto, não é responsável pelo armazenamento e o tratamento dos dados informados no Sistema.</p><p>A TASK reconhece a importância de proteger suas informações pessoais, sendo que o sistema foi elaborado para processar de forma responsável os seus dados e em conformidade com as leis de proteção de dados vigentes.</p><p>A Empregadora atua como Controladora e Operadora de Dados, e é encarregada em definir como os dados pessoais serão tratados.</p><p><b><u>2. INFORMAÇÕES COLETADAS NO SISTEMA</u></b></p><p>A Empregadora recebe e armazena as informações pessoais e não pessoais relacionadas diretamente aos serviços oferecidos no sistema. Os Usuários fornecem as informações de cadastro correlacionadas ao registro de ponto por meio do sistema.A informação coletada compreende dados como: matrícula, nome, foto, código do usuário, senha, e-mail, geolocalização, entre outros que a Empregadora poderá definir no sistema e que seja essencial para:</p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; o cumprimento de sua obrigação legal ou regulatória; e</p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; necessário para a execução de contrato;</p><p>A TASK NÃO TEM qualquer responsabilidade sobre quais dados serão coletados e armazenados no sistema A base de dados formada pela coleta e tratamento das informações é de propriedade da Empregadora.</p><p>Qualquer informação pessoal coletada pela Empregadora nas formas descritas anteriormente, será tratada de acordo com as disposições constantes neste instrumento.</p><p><b><u>3. COOKIES E OUTRAS FUNCIONALIDADES DE COLETA DE DADOS</u></b></p><p>Cookies são pequenos arquivos que podem ou não ser adicionados ao dispositivo do Usuário, e são utilizados para <u>armazenar dados da sua navegação</u> e assim personalizar a experiência do Usuário, assim, este não precisa sempre que acessar ao sistema indicar login e senha, sendo que as informações ficam salvas</p><p>Ao utilizar o sistema, serão enviadas pelo servidor da Empregadora, informações do Usuário que são denominados Cookies, visando auxiliar na identificação da conta e na facilidade e eficiência da navegação, simplificando o login de Usuários cadastrados, auxiliando na garantia de segurança e autenticidade dos acessos, bem como para controle interno de preferências. </p><p>O gerenciamento das configurações dos cookies podem variar de acordo com o tipo e versão instalado no seu aparelho, por favor visitar as declarações e a forma de uso de seu navegador para controlar sua navegação.O Sistema também coleta informações internas do dispositivo utilizado pelo Usuário, tais como, Sistema Operacional do dispositivo e Código ID (IMEI/UUID) para possibilitar à funcionalidade de notificação, ressaltando que o acesso a essas informações será do Controlador, uma vez que as informações ficarão armazenadas em seu servidor</p><p>O Aplicativo pode coletar e armazenar informações localmente em seu dispositivo usando mecanismos como caches de dados de aplicativos e armazenamento no navegador web. Estas informações serão utilizadas para garantir a operação e a qualidade do serviço do Aplicativo e manter o cadastro atualizado.</p><p><b><u>4. DA FINALIDADE E UTILIZAÇÃO DOS DADOS PESSOAIS COLETADOS</u></b></p><p>O Sistema utiliza as informações pessoais e não pessoais coletadas para proporcionar o registro e análise do ponto dos funcionários com o uso exclusivamente profissional.</p><p>Os dados pessoais são coletados e utilizados pelo sistema para atender aos requisitos mínimos exigidos pela legislação federal no processamento do ponto eletrônico.</p><p>A Empregadora é quem decide como os dados pessoais serão tratados, determinando a exibição ou não dos dados pessoais aos Usuários do sistema.</p><p><b><u>5. COMPARTILHAMENTO DE INFORMAÇÕES</u></b></p><p>Como o objetivo deste Sistema é interligar o Usuário com a Empregadora, o compartilhamento das informações se dará entre estas duas entidades, considerando que a TASK é apenas intermediária de serviços e não detentora das informações trafegadas e/ou armazenadas.</p><p>A Empregadora poderá, sem prévio consentimento do Usuário, compartilhar suas informações pessoais somente se forem requisitadas por lei a fim de: (a) cumprir qualquer regulamentação, legislação, processo legal ou solicitação governamental aplicável; (b) cumprir Termos de Serviço aplicáveis, inclusive investigação de possíveis violações; (c) detectar, impedir ou abordar de alguma outra forma fraude, questões técnicas ou de segurança; ou (d) proteger contra danos aos direitos, a propriedade ou a segurança do Aplicativo, nossos usuários ou o público, conforme solicitado ou permitido por lei.</p><p>O Sistema pode utilizar links para sites externos que não são operados pela TASK para atendimento de determinados serviços, exemplo: fiscalização do trabalho, exportação de cartão de ponto ou exportar dados de verbas geradas de pagamento. Neste caso a TASK não tem controle sobre o conteúdo e práticas desses sites e não podemos aceitar responsabilidade por suas respectivas políticas de privacidade.</p><p><b><u>6. DADOS DE ADOLESCENTES</u></b></p><p>O usuário deverá ser plenamente capaz, nos termos da legislação vigente, para fazer o uso do sistema. Se o usuário for adolescentes, o tratamento deverá ser realizado em seu melhor interesse.</p><p><b><u>7. SEGURANÇA DAS INFORMAÇÕES</u></b></p><p>O sistema foi desenvolvido atendendo os critérios de segurança e as instruções são direcionadas a Empregadora que configura o sistema no seu ambiente e qualquer alteração realizada no sistema pela TASK ocorre apenas com a autorização expressa da Empregadora.</p><p>O sistema permite a obtenção de algumas informações automaticamente e armazenamos em arquivos de log. Entre essas informações estão o nome do usuário, informações da estação de trabalho e informações sobre a operação do sistema com o objetivo de registrar o comportamento do usuário para fins de atender auditoria e as instruções legais. É de responsabilidade da Empregadora armazenar os dados informados no Sistema em um banco de dados reservado, com acesso restrito às pessoas habilitadas e em um ambiente seguro. A ocorrência de quaisquer ataques e/ou interceptações, entre outros, no sistema, redes e/ou bases de dados por pessoas não autorizadas é de responsabilidade da Empregadora. Neste caso, caberá ao Empregador comunicar autoridade nacional e ao titular a ocorrência de incidente de segurança que possa acarretar risco ou dano relevante aos titulares.</p><p><b><u>8. PROTEÇÃO DE SENHAS E DO ACESSO DO USUÁRIO</u></b></p><p>As informações fornecidas no sistema serão disponibilizadas no banco de dados da Empregadora e utilizados de acordo com a Política de Privacidade desta. O cadastro é pessoal e protegido por senha criada por você ou sua Empregadora, e é de sua responsabilidade manter a guarda e sigilo e não divulgar para terceiros. Caso ocorra quebra de sigilo por favor informar imediatamente a Empregadora a respeito. Na hipótese de extravio do controle de acesso da sua conta ou senha, o Usuário poderá solicitar a troca da sua senha a Empregadora.</p><p>O Usuário poderá, a qualquer tempo, realizar a alteração da sua foto e do seu e-mail, anteriormente cadastrados no sistema.</p><p>Apenas a Empregadora poderá, a qualquer tempo, solicitar a alteração de senha de acesso e dos demais dados cadastrais anteriormente fornecidos, exceto se a Empregadora disponibilizar o acesso ao Usuário, ocasião em que ele poderá solicitar a alteração diretamente. </p><p>O Usuário é responsável por certificar-se de que seus equipamentos são condizentes com as características técnicas necessárias para o acesso e utilização do sistema, bem como em relação à conexão com a internet.</p><p><b><u>9-DÚVIDAS E CORREÇÃO DE DADOS</u></b></p><p>Em caso de dúvidas sobre o Aplicativo, o Usuário poderá contatar a TASK pelo e-mail cai.br@dormakaba.com, a empresa avaliará seu pedido e providenciará a resposta no prazo de 15 dias úteis a contar do recebimento do e-mail. </p><p>Em caso de dúvidas sobre as informações apresentadas no Sistema ou eventuais alterações cadastrais, o Usuário poderá contatar a Empregadora</p><p><b><u>10. PERÍODO DE RETENÇÃO</u></b></p><p>Os dados são de propriedade da <b>Empregadora</b> e esta que decidirá de acordo com suas obrigações legais, regulatórias e a reserva de direitos o tempo de retenção ou a exclusão dos dados. Deste modo, o Sistema não deverá reter dados pessoais por mais tempo do que o necessário para cumprir os fins para os quais eles são processados, incluindo a segurança do processamento, o cumprimento das obrigações jurídicas e regulamentares da Empregadora (termos de retenção estabelecidos por lei ou auditoria).</p><p><b><u>11. DIREITOS DO USUÁRIO</u></b></p><p>Os USUÁRIOS poderão requisitar ao Encarregado de proteção de Dados da <b>Empregadora:</b></p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; Confirmação da existência de tratamento;</p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; Acesso aos dados pessoais;</p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; Correção de dados incompletos, inexatos ou desatualizados;</p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; Anonimização, bloqueio ou eliminação de dados desnecessários, excessivos ou tratados em desconformidade com o disposto nesta Lei;</p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; Informação das entidades públicas e privadas com as quais o Controlador realizou uso compartilhado de dados;</p><p>&nbsp;&nbsp;&nbsp;&nbsp;•&nbsp;&nbsp; Informação sobre a possibilidade de não fornecer consentimento e sobre as consequências da negativa.</p><p>A manutenção dos dados no aplicativo pode ocorrer para atender as finalidades descritas em Lei, quais sejam:  cumprimento de obrigação legal ou regulatória pelo Controlador; estudo por órgão de pesquisa, garantida, sempre que possível, a anonimização dos dados pessoais transferência a terceiro, desde que respeitados os requisitos de tratamento de dados dispostos na Lei; ou uso exclusivo do Controlador, vedado seu acesso por terceiro, e desde que anonimizados os dados.</p><p><b><u>12. DA TRASNFERÊNCIA INTERNACIONAL DE DADOS</u></b></p><p>A transferência internacional de dados só ocorrerá com os requisitos previstos em Lei e com a solicitação por escrito da Empregadora, sendo esta responsável pela segurança desta operação.</p><p><b><u>13. ALTERAÇÕES NA POLÍTICA DE PRIVACIDADE</u></b></p><p>A TASK reserva-se no direito de alterar o Termo a qualquer momento sem autorização ou prévio conhecimento do Usuário, sendo que as alterações serão divulgadas para consulta a qualquer tempo.</p><p>Ao clicar no aceite desta declaração, você fica ciente dos termos desta Declaração vigente na data de utilização, cabendo verificá-la previamente cada vez que visitar o sistema. </p> 
+                    <a id="lblTermoUso" style="font-weight:bold;"><input id="chkTermoDeUso" type="checkbox" onclick="HabilitaTermo()" value=""> Li e estou de acordo com o termo de uso</a>
+                    
+                </div>
+              </div>
+              <div class="modal-footer" style="text-align: left;">
+                                                   
+                <a id="btnSalvarTermo" class="btn btn-success btn-sm disabled" href="javascript:__doPostBack(&#39;btnSalvarTermo&#39;,&#39;&#39;)"><i class="glyphicon glyphicon-ok"></i></a>
+                <a id="btnCancela" class="btn btn-warning btn-sm" data-dismiss="modal" href="javascript:__doPostBack(&#39;btnCancela&#39;,&#39;&#39;)"><i class="glyphicon glyphicon-remove"></i></a>
+                
+              </div>
+            </div>
+          </div>
+        </div>       
+
+        <script>
+            webshims.activeLang('pt-br');
+            webshims.polyfill('forms forms-ext');
+
+            $(document).ready(function () {
+                $('[data-toggle="tooltip"]').tooltip();
+            });
+        </script> 
+    
+
+<script type="text/javascript">
+//<![CDATA[
+$('#pnlFuncionario').hide();Sys.Extended.UI.Localization.SetLocale("pt");WebForm_AutoFocus('txtUsuario');Sys.Application.add_init(function() {
+    $create(Sys.Extended.UI.ModalPopupBehavior, {"backgroundCssClass":"modalBackground","dynamicServicePath":"/ForpontoWeb/Login.aspx","id":"extMensagem","okControlID":"btnYes","onOkScript":"window.location.href = $(\u0027#lnkMensagem\u0027).attr(\u0027href\u0027);","popupControlID":"pnlMensagemPopup"}, null, null, $get("lnkMensagem"));
+});
+//]]>
+</script>
+<div data-act-control-type="modalPopupBackground" id="extMensagem_backgroundElement" class="modalBackground" style="display: none; position: fixed; left: 0px; top: 0px; z-index: 10000;"></div></form>
+
+
+</body></html>
